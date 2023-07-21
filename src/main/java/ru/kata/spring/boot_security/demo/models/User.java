@@ -87,9 +87,4 @@ public class User {
                 ", password='" + password + '\'' +
                 '}';
     }
-
-    public static void main(String[] args) {
-        User user = new User();
-        System.out.println(user.roles);
-    }
 }
