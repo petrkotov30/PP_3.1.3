@@ -7,22 +7,24 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-//    private final SuccessUserHandler successUserHandler;
     private final UserService userService;
+
     @Autowired
     public WebSecurityConfig(UserService userService) {
         this.userService = userService;
     }
-
+//    private final SuccessUserHandler successUserHandler;
+//    @Autowired
 //    public WebSecurityConfig(SuccessUserHandler successUserHandler) {
 //        this.successUserHandler = successUserHandler;
+//
 //    }
 
 
@@ -30,56 +32,52 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/index").permitAll()
-                .antMatchers("/only_for_admins").hasRole("ADMIN")
-                .antMatchers("/hello").hasAnyRole("USER,ADMIN")
-                .anyRequest().authenticated()
+                .antMatchers("/authenticated/**").authenticated()
+                .antMatchers("/only_for_admins/**").hasRole("ADMIN")
+                .antMatchers("/read_profile/**").hasAuthority("READ_PROFILE")
                 .and()
                 .formLogin()
-//                .successHandler(successUserHandler)
-                .permitAll()
                 .and()
                 .logout()
-                .permitAll();
+                .logoutSuccessUrl("/");
     }
-
-    //настройка от господина Алишева
-//    private final AuthProviderImpl authProvider;
-//
-//    @Autowired
-//    public WebSecurityConfig(AuthProviderImpl authProvider) {
-//        this.authProvider = authProvider;
-//    }
-//
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) {
-//        auth.authenticationProvider(authProvider);
-//    }
-
-    // аутентификация inMemory
 //    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//                User.withDefaultPasswordEncoder()
-//                        .username("user")
-//                        .password("user")
-//                        .roles("USER")
-//                        .build();
-//        UserDetails admin =
-//                User.withDefaultPasswordEncoder()
-//                        .username("admin")
-//                        .password("admin")
-//                        .roles("ADMIN")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user, admin);
+//    public UserDetailsService users() {
+//        UserDetails user = User.builder()
+//                .username("petr")
+//                .password("{bcrypt}$2a$12$4boBheZouecMyGNqbpHekO3F7nbh2lW9SKj73BBV/t3hKQj5i9CEq")
+//                .roles("USER")
+//                .build();
+//        UserDetails admin = User.builder()
+//                .username("admin")
+//                .password("{bcrypt}$2a$12$4boBheZouecMyGNqbpHekO3F7nbh2lW9SKj73BBV/t3hKQj5i9CEq")
+//                .roles("USER","ADMIN")
+//                .build();
+//        return new InMemoryUserDetailsManager(user,admin);
 //    }
 
-    //для преобразования паролей в хэш
+    //jdbcAuthentication
+//    @Bean
+//    public JdbcUserDetailsManager users(DataSource dataSource) {
+//        UserDetails user = User.builder()
+//                .username("petr")
+//                .password("{bcrypt}$2a$12$4boBheZouecMyGNqbpHekO3F7nbh2lW9SKj73BBV/t3hKQj5i9CEq")
+//                .roles("USER")
+//                .build();
+//        UserDetails admin = User.builder()
+//                .username("admin")
+//                .password("{bcrypt}$2a$12$4boBheZouecMyGNqbpHekO3F7nbh2lW9SKj73BBV/t3hKQj5i9CEq")
+//                .roles("USER", "ADMIN")
+//                .build();
+//        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+//        jdbcUserDetailsManager.createUser(user);
+//        jdbcUserDetailsManager.createUser(admin);
+//        return jdbcUserDetailsManager;
+//    }
+    //метод для преобразования паролей в хэш
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new SCryptPasswordEncoder();
     }
 
     @Bean
