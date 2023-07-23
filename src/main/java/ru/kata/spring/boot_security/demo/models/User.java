@@ -22,7 +22,10 @@ public class User {
     private String password;
     @Column(name = "email")
     private String email;
-    @ManyToMany
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.EXTRA)
+    @Fetch(FetchMode.JOIN)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
